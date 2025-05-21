@@ -1,0 +1,7 @@
+register => http://localhost:3000/api/user/users/registerUser
+verifyotp => http://localhost:3000/api/user/users/verifyOtp
+login => http://localhost:3000/api/user/users/loginUser
+passwordchange => http://localhost:3000/api/user/users/changePassword
+forgotpassword => http://localhost:3000/api/user/users/forgotPassword
+verifyemail => http://localhost:3000/api/user/users/verifyEmail
+resetpassword => http://localhost:3000/api/user/users/resetPassword
