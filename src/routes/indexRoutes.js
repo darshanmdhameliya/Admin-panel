@@ -1,10 +1,10 @@
 
 import express from "express";
-import usersRoutes from "../routes/userRoutes.js";
+import sellerRoutes from "../routes/sellerRoutes.js";
 
-const userRoute = express.Router();
+const sellerRoute = express.Router();
 
 //User Route
-userRoute.use("/users", usersRoutes);
+sellerRoute.use("/sellers", sellerRoutes);
 
-export default userRoute;
+export default sellerRoute

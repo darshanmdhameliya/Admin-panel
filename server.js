@@ -1,8 +1,10 @@
 
 import dotenv from "dotenv";
 import express from "express";
-import userRoute from "./src/routes/indexRoutes.js";
 import { connectDB } from "./src/config/db.js";
+import sellerRoute from "./src/routes/indexRoutes.js";
+
+
 
 dotenv.config();
 
@@ -13,7 +15,8 @@ const app = express();
 app.use(express.json());
 
 // User Route
-app.use("/api/user", userRoute);
+app.use("/api/seller", sellerRoute);
+
 
 // Connect to Database
 connectDB();
