@@ -1,30 +1,35 @@
 
 import express from "express";
-import { registerSeller, loginSeller, changePassword, forgotPassword, resetPassword, VerifyEmail, VerifyOtp, gstNo, VerifyGst, VerifyGstOtp, brandDetails, bankDetails, pickupAddress, putProfile, getSeller, getSellerById, editbankDetails } from "../controllers/sellerContoller.js";
+import { registerSeller, loginSeller, changePassword, forgotPassword, resetPassword, VerifyEmail, VerifyOtp, gstNo, VerifyGst, VerifyGstOtp, brandDetails, bankDetails, pickupAddress, putProfile, getSeller, getSellerById, editbankDetails, verifyBankOtp, deleteAccount, logout } from "../controllers/sellerController.js";
+import sellerAuth from "../middlerware/auth.js";
 
-const sellersRoutes = express.Router();
+
+const sellerRoutes = express.Router();
 
 //sellerroutes post api
-sellersRoutes.post("/registerSeller", registerSeller);
-sellersRoutes.post("/verifyOtp", VerifyOtp);
-sellersRoutes.post("/loginSeller", loginSeller);
-sellersRoutes.post("/changePassword", changePassword);
-sellersRoutes.post("/forgotPassword", forgotPassword);
-sellersRoutes.post("/verifyEmail", VerifyEmail);
-sellersRoutes.post("/resetPassword", resetPassword);
-sellersRoutes.post("/gstNo", gstNo)
-sellersRoutes.post("/verifyGst", VerifyGst);
-sellersRoutes.post("/verifyGstOtp", VerifyGstOtp);
-sellersRoutes.post("/brandDetails", brandDetails);
-sellersRoutes.post("/bankDetails", bankDetails);
-sellersRoutes.post("/pickupAddress", pickupAddress);
+sellerRoutes.post("/registerSeller", registerSeller);
+sellerRoutes.post("/verifyOtp", VerifyOtp);
+sellerRoutes.post("/loginSeller", loginSeller);
+sellerRoutes.post("/changePassword", sellerAuth, changePassword);
+sellerRoutes.post("/forgotPassword", forgotPassword);
+sellerRoutes.post("/verifyEmail", VerifyEmail);
+sellerRoutes.post("/resetPassword", resetPassword);
+sellerRoutes.post("/gstNo", sellerAuth, gstNo)
+sellerRoutes.post("/verifyGst", sellerAuth, VerifyGst);
+sellerRoutes.post("/verifyGstOtp", sellerAuth, VerifyGstOtp);
+sellerRoutes.post("/brandDetails", sellerAuth, brandDetails);
+sellerRoutes.post("/bankDetails", sellerAuth, bankDetails);
+sellerRoutes.post("/pickupAddress", sellerAuth, pickupAddress);
 
 
 //sellerroutes get api
-sellersRoutes.put("/sellerData/:id", putProfile);
-sellersRoutes.get("/getsellerData", getSeller);
-sellersRoutes.get("/getsellerDataById/:id", getSellerById);
-sellersRoutes.put("/editbankDetails/:id", editbankDetails);
+sellerRoutes.put("/sellerData/:id", sellerAuth, putProfile);
+sellerRoutes.get("/getsellerData", sellerAuth, getSeller);
+sellerRoutes.get("/getsellerDataById/:id", sellerAuth, getSellerById);
+sellerRoutes.put("/editbankDetails/:id", sellerAuth, editbankDetails);
+sellerRoutes.post("/verifyBankOtp", sellerAuth, verifyBankOtp);
+sellerRoutes.post("/deleteAccount/:id", sellerAuth, deleteAccount);
+sellerRoutes.post("/logout", logout);
 
 
-export default sellersRoutes;
+export default sellerRoutes;

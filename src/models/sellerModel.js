@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 const sellerSchema = mongoose.Schema(
   {
@@ -57,6 +58,9 @@ const sellerSchema = mongoose.Schema(
     IFSCcode: {
       type: String,
     },
+    bankOtp: {
+      type: Number,
+    },
     R_F_B_Number: {
       type: String,
     },
@@ -82,7 +86,7 @@ const sellerSchema = mongoose.Schema(
     },
     isAdmin: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   {
@@ -90,5 +94,6 @@ const sellerSchema = mongoose.Schema(
     versionKey: false,
   }
 );
+
 
 export default mongoose.model("sellers", sellerSchema);

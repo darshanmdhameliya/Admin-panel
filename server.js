@@ -2,20 +2,23 @@
 import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./src/config/db.js";
-import sellerRoute from "./src/routes/indexRoutes.js";
-
-
-
+import cookieParser from "cookie-parser";
+import sellerRoutes from "./src/routes/sellerRoutes.js";
+import productRoutes from "./src/routes/productRoutes.js";
 dotenv.config();
 
 const port = process.env.PORT;
 const app = express();
+app.use(cookieParser());
 
 // Middleware
 app.use(express.json());
 
-// User Route
-app.use("/api/seller", sellerRoute);
+//seller Route
+app.use("/api/sellers", sellerRoutes);
+
+//product Route
+app.use("/api/products", productRoutes);
 
 
 // Connect to Database

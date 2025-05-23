@@ -1,4 +1,3 @@
-import { gstNo } from "../controllers/sellerContoller.js";
 import Seller from "../models/sellerModel.js";
 
 class SellerServices {

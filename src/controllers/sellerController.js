@@ -69,7 +69,7 @@ export const registerSeller = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        seller: process.env.MY_GMAIL,
+        user: process.env.MY_GMAIL,
         pass: process.env.MY_PASSWORD,
       },
       tls: {
@@ -131,7 +131,6 @@ export const loginSeller = async (req, res) => {
   try {
     let seller = await sellerServices.getSeller({
       email: req.body.email,
-      isDelete: false,
     });
     if (!seller) {
       return res.status(400).json({
@@ -144,7 +143,14 @@ export const loginSeller = async (req, res) => {
         message: ` Password is Not Match Please Enter Correct Password..`,
       });
     }
-    let token = jwt.sign({ sellerId: seller._id }, "seller");
+    // let token = await seller.getJWT();
+    // res.cookie("token", token, {
+    //   expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    //   httpOnly: true,
+    // });
+
+    let token = await jwt.sign({_id: seller._id}, process.env.JWT_SECRET, { expiresIn: "7d" });
+    
     res.status(200).json({ token, message: `Login SuccesFully..` });
   } catch (error) {
     return ThrowError(res, 500, error.message);
@@ -219,7 +225,7 @@ export const forgotPassword = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        seller: process.env.MY_GMAIL,
+        user: process.env.MY_GMAIL,
         pass: process.env.MY_PASSWORD,
       },
       tls: {
@@ -692,18 +698,134 @@ export const getSellerById = async (req, res) => {
 
 //editbankDetails
 export const editbankDetails = async (req, res) => {
+  const { mobileNo, email } = req.body;
+  const id = req.params.id;
 
-  const _id = req.params.id;
-  const updatedSeller = await sellerModel.findByIdAndUpdate(_id, { ...req.body }, { new: true });
-  if (!updatedSeller) {
-    return res.status(404).json({ message: "Seller not found" });
+  if (!mobileNo || !email || mobileNo === "" || email === "") {
+    return res.status(400).json({ message: "Mobile number and email are required." });
   }
-  res.status(200).json(updatedSeller)
-  updatedSeller.bankName = bankName;
-  updatedSeller.accountNo = accountNo;
-  updatedSeller.IFSCcode = IFSCcode;
-  await updatedSeller.save();
-  return res.status(200).json({
-    message: "Bank Name added successfully.",
+
+  const seller = await sellerServices.getSellerById(id);
+  if (!seller) {
+    return res.status(404).json({ message: "Seller not found." });
+  }
+
+  if (seller.mobileNo !== mobileNo) {
+    return res.status(400).json({ message: "Mobile number is wrong!!." });
+  }
+
+  if (seller.email !== email) {
+    return res.status(400).json({ message: "Email is wrong!!." });
+  }
+
+  // OTP generation
+  const otp = generateOTP();
+  seller.bankOtp = otp;
+  seller.otpExpires = Date.now() + 10 * 60 * 1000;
+
+  await seller.save();
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.MY_GMAIL,
+      pass: process.env.MY_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
+
+  const mailOptions = {
+    from: process.env.MY_GMAIL,
+    to: email,
+    subject: "Bank details OTP",
+    text: `Your OTP for Bank details is: ${otp}. It is valid for 10 minutes.`,
+  };
+
+  await transporter.sendMail(mailOptions);
+
+  return res.status(200).json({
+    message: "OTP sent successfully to your email.",
+    seller: {
+      id: seller._id,
+      email: seller.email,
+      mobileNo: seller.mobileNo,
+      otp: seller.bankOtp,
+    },
+  });
+};
+
+
+//verifyBankOtp
+export const verifyBankOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp || email === "" || otp === "") {
+      return res
+        .status(400)
+        .json({ message: "Please provide Email and OTP." });
+    }
+
+    const seller = await sellerServices.getSellerByEmail(email);
+    if (!seller) {
+      return res.status(404).json({ message: "seller not found." });
+    }
+
+    // Validate OTP
+    if (seller.bankOtp !== otp || seller.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
+
+    seller.bankOtp = undefined;
+    seller.otpExpires = undefined;
+    await seller.save();
+
+    return res.status(200).json({ message: "Bank details verified successfully." });
+
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
+  }
 }
+
+//deleteaccount
+export const deleteAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Seller ID is required." });
+    }
+    // Check if the seller exists
+    const seller = await sellerServices.getSellerById(id);
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found." });
+    }
+    //passwod check
+    const { password } = req.body;
+    if (!password || password === "") {
+      return res.status(400).json({ message: "Password is required." });
+    }
+    const isMatch = await bcrypt.compare(password, seller.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Password is incorrect." });
+    }
+
+    // Soft delete the seller
+    await sellerServices.updateSeller(id, { isDelete: true });
+    return res.status(200).json({ message: "Account deleted successfully." });
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
+  }
+}
+
+
+//logout
+export const logout = async (req, res) => {
+  try {
+    res.cookie("token", null, { expires: new Date(Date.now()) });
+
+    return res.status(400).json({ message: "User logout successfully...✅" });
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
+  }
+};
