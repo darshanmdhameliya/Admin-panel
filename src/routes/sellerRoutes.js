@@ -1,6 +1,6 @@
 
 import express from "express";
-import { registerSeller, loginSeller, changePassword, forgotPassword, resetPassword, VerifyEmail, VerifyOtp, gstNo, VerifyGst, VerifyGstOtp, brandDetails, bankDetails, pickupAddress, putProfile, getSeller, getSellerById, editbankDetails, verifyBankOtp, deleteAccount, logout } from "../controllers/sellerController.js";
+import { registerSeller, loginSeller, changePassword, forgotPassword, resetPassword, VerifyEmail, VerifyOtp, gstNo, VerifyGst, VerifyGstOtp, brandDetails, bankDetails, pickupAddress, putProfile, getSeller, getSellerById, editbankDetails, verifyBankOtp, deleteAccount, sellerLogout } from "../controllers/sellerController.js";
 import sellerAuth from "../middlerware/auth.js";
 
 
@@ -29,7 +29,7 @@ sellerRoutes.get("/getsellerDataById/:id", sellerAuth, getSellerById);
 sellerRoutes.put("/editbankDetails/:id", sellerAuth, editbankDetails);
 sellerRoutes.post("/verifyBankOtp", sellerAuth, verifyBankOtp);
 sellerRoutes.post("/deleteAccount/:id", sellerAuth, deleteAccount);
-sellerRoutes.post("/logout", logout);
+sellerRoutes.post("/logout", sellerLogout);
 
 
 export default sellerRoutes;

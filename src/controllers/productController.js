@@ -2,6 +2,7 @@ import productModel from "../models/productModel.js";
 import { ThrowError } from "../utils/ErrorUtils.js";
 import ProductServices from "../services/productServices.js";
 
+
 const productServices = new ProductServices();
 
 //adproduct

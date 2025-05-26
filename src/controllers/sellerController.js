@@ -149,8 +149,8 @@ export const loginSeller = async (req, res) => {
     //   httpOnly: true,
     // });
 
-    let token = await jwt.sign({_id: seller._id}, process.env.JWT_SECRET, { expiresIn: "7d" });
-    
+    let token = await jwt.sign({ _id: seller._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
     res.status(200).json({ token, message: `Login SuccesFully..` });
   } catch (error) {
     return ThrowError(res, 500, error.message);
@@ -819,13 +819,19 @@ export const deleteAccount = async (req, res) => {
 }
 
 
-//logout
-export const logout = async (req, res) => {
+//seller logout with bearer token
+export const sellerLogout = async (req, res) => {
   try {
-    res.cookie("token", null, { expires: new Date(Date.now()) });
+    // Clear the token from the request
+    req.token = null;
 
-    return res.status(400).json({ message: "User logout successfully...✅" });
+    // Optionally, you can also clear the cookie if you're using cookies for authentication
+    res.clearCookie("token");
+
+    return res.status(200).json({ message: "Seller logged out successfully." });
   } catch (error) {
     return ThrowError(res, 500, error.message);
   }
-};
+}
+
+

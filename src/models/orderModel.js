@@ -1,40 +1,56 @@
 import mongoose from "mongoose";
 
 const orderSchema = mongoose.Schema({
-  OrderId: {
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  addressId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'addresses'
+  },
+  product: {
+    type: Array
+  },
+  subTotal: {
+    type: String
+  },
+  discount: {
+    type: String
+  },
+  tax: {
+    type: String
+  },
+  deliveryCharge: {
+    type: String
+  },
+  totalAmount: {
+    type: String
+  },
+  paymentStatus: {
     type: String,
   },
-  Custoemr_name: {
+  paymentMethod: {
     type: String,
+    enum: ["Debit / Credit Card", "Net Banking", "Paypal"]
   },
-  Date_Time: {
-    type: Date,
+  transactionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
-  Payment: {
+  card_HolderName: {
+    type: String
+  },
+  card_Number: {
+    type: Number
+  },
+  orderStatus: {
     type: String,
-  },
-  Amount: {
-    type: Number,
-  },
-  Payment_Status: {
-    type: String,
-  },
-  Order_Status: {
-    type: String,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
+    enum: ["accepted", "rejected"],
+  }
+}, {
+  timestamps: true,
+  versionKey: false
 });
 
-
-export default mongoose.model("Order", orderSchema);    
+export default mongoose.model("Order", orderSchema);

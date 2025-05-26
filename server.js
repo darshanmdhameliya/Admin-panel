@@ -6,6 +6,10 @@ import cookieParser from "cookie-parser";
 import sellerRoutes from "./src/routes/sellerRoutes.js";
 import productRoutes from "./src/routes/productRoutes.js";
 import orderRoutes from "./src/routes/orderRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
+import couponRoutes from "./src/routes/couponRoutes.js";
+import addressRoutes from "./src/routes/addressRoutes.js";
+import rejectOrderRoutes from "./src/routes/rejectOrderRoutes.js";
 dotenv.config();
 
 const port = process.env.PORT;
@@ -23,6 +27,19 @@ app.use("/api/products", productRoutes);
 
 //order Route
 app.use("/api/orders", orderRoutes);
+
+//user Route
+app.use("/api/users", userRoutes);
+
+//coupon Route
+app.use("/api/coupons", couponRoutes);
+
+//address Route
+app.use("/api/addresses", addressRoutes);
+
+//rejectOrder Route
+app.use("/api/rejectOrders", rejectOrderRoutes);
+
 
 // Connect to Database
 connectDB();

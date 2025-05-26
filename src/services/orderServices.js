@@ -1,4 +1,4 @@
-import order from "./models/orderModel.js";
+import order from "../models/orderModel.js";
 
 class OrderServices {
   // Add Order
@@ -75,4 +75,4 @@ class OrderServices {
   }
 }
 
-export default new OrderServices;
+export default OrderServices;
