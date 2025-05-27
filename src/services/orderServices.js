@@ -33,6 +33,16 @@ class OrderServices {
       console.log(error);
     }
   }
+  // Update Order Status
+  async updateOrderStatus(id, status) {
+    try {
+      return await order.findByIdAndUpdate(id, {
+        status
+      }, { new: true });
+    } catch (error) {
+      return error.message;
+    }
+  }
   // Update Order
   async updateOrder(id, body) {
     try {

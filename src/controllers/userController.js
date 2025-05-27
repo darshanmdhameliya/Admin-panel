@@ -31,6 +31,7 @@ export const addNewUser = async (req, res) => {
 
         return res.status(201).json({
             message: "User added successfully",
+            userId: addUser._id,
             data: newUser,
         });
     } catch (error) {
@@ -59,4 +60,83 @@ export const loginUser = async (req, res) => {
         return ThrowError(res, 500, error.message);
     }
 }
+
+// Get User by ID
+export const getUserById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return await ThrowError(res, 400, "Invalid user ID");
+        }
+        const user = await userServices.getUserById(userId);
+        if (!user) {
+            return await ThrowError(res, 404, "User not found");
+        }
+        return res.status(200).json({
+            message: "User fetched successfully",
+            data: user,
+        });
+    } catch (error) {
+        return ThrowError(res, 500, error.message);
+    }
+}
+
+// Update User
+export const updateUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { name, mobileNo, email } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return await ThrowError(res, 400, "Invalid user ID");
+        }
+
+        const updatedUser = await userServices.updateUser(userId, { name, mobileNo, email });
+        if (!updatedUser) {
+            return await ThrowError(res, 404, "User not found");
+        }
+
+        return res.status(200).json({
+            message: "User updated successfully",
+            data: updatedUser,
+        });
+    } catch (error) {
+        return ThrowError(res, 500, error.message);
+    }
+}
+// Delete User
+export const deleteUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return await ThrowError(res, 400, "Invalid user ID");
+        }
+
+        const deletedUser = await userServices.deleteUser(id);
+        if (!deletedUser) {
+            return await ThrowError(res, 404, "User not found");
+        }
+
+        return res.status(200).json({
+            message: "User deleted successfully",
+            data: deletedUser,
+        });
+    } catch (error) {
+        return ThrowError(res, 500, error.message);
+    }
+}
+// Get All Users
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await userServices.getAllUsers();
+        return res.status(200).json({
+            message: "Users fetched successfully",
+            data: users,
+        });
+    } catch (error) {
+        return ThrowError(res, 500, error.message);
+    }
+}
+
 

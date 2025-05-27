@@ -47,6 +47,17 @@ class UserServices {
         }
     }
 
+    // Delete User
+    async deleteUser(id) {
+        try {
+            return await User.findByIdAndDelete(id);
+        }
+        catch (error) {
+            return error.message;
+        }
+    }
+
+    // Get User By Email
     async getUserByEmail(email) {
         try {
             return await User.findOne({ email }).exec();

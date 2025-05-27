@@ -1,57 +1,8 @@
 import ordermodel from "../models/orderModel.js";
 import { ThrowError } from "../utils/ErrorUtils.js";
-import OrderServices from "../services/orderServices.js";
 import productModel from "../models/productModel.js";
-
-const orderServices = new OrderServices();
-
+import orderModel from "../models/orderModel.js";
 //add new order
-// export const addNewOrder = async (req, res) => {
-//   try {
-//     const { userId, addressId, product, quantity, discount, paymentStatus, paymentMethod, transactionId, card_HolderName, card_Number } = req.body;
-
-//     const productId = product.map(p => p.productId);
-//     const products = await productModel.find({ _id: { $in: productId } });
-
-//     let subTotal = 0;
-//     product.forEach(p => {
-//       const prodDetail = products.find(d => d._id.toString() === p.productId);
-//       if (prodDetail) {
-//         subTotal += prodDetail.discount * p.quantity;
-//       }
-//     });
-
-//     const tax = 18;
-//     const deliveryCharge = 150;
-//     const discounted = (subTotal * discount) / 100;
-//     const discountedPrice = subTotal - discounted;
-//     const taxed = (discountedPrice * tax) / 100;
-//     const taxedPrice = discountedPrice + taxed;
-//     const totalAmount = taxedPrice + deliveryCharge;
-
-//     const newOrder = new ordermodel({
-//       userId,
-//       product,
-//       addressId,
-//       quantity,
-//       discount: totalAmount,
-//       paymentStatus,
-//       paymentMethod,
-//       transactionId,
-//       card_HolderName,
-//       card_Number
-//     });
-
-//     await newOrder.save();
-
-//     return res.status(201).json({
-//       message: "Order added successfully",
-//       data: newOrder,
-//     });
-//   } catch (error) {
-//     return ThrowError(res, 500, error.message);
-//   }
-// };
 
 export const addNewOrder = async (req, res) => {
   try {
@@ -64,7 +15,8 @@ export const addNewOrder = async (req, res) => {
       paymentMethod,
       transactionId,
       card_HolderName,
-      card_Number
+      card_Number,
+      orderStatus
     } = req.body;
 
     const productIds = product.map(p => p.productId);
@@ -106,7 +58,7 @@ export const addNewOrder = async (req, res) => {
       transactionId,
       card_HolderName,
       card_Number,
-      orderStatus: 'Pending'
+      orderStatus
     });
 
 
@@ -232,37 +184,127 @@ export const getAllOrder = async (req, res) => {
   }
 };
 
-//order accepted
-export const orderAccepted = async (req, res) => {
+//update order
+export const updateOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const sellerId = req.seller._id; // from your sellerAuth middleware
+    const { orderStatus } = req.body;
 
-    // Find order by ID
+    if (!orderId || !orderStatus) {
+      return res.status(400).json({ status: false, message: 'Order ID and status are required' });
+    }
+
+    const validStatuses = ['accepted', 'rejected', 'pending', 'under process', 'shipped', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(orderStatus)) {
+      return res.status(400).json({ status: false, message: 'Invalid order status' });
+    }
+
+    // Check if the order exists
     const order = await ordermodel.findById(orderId);
-
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ status: false, message: 'Order not found' });
     }
 
-    // Check if this order belongs to the logged-in seller
-    if (order.seller.toString() !== sellerId.toString()) {
-      return res.status(403).json({ message: 'Unauthorized: This order does not belong to you' });
+    // Update the order status
+    const updatedOrder = await ordermodel.findByIdAndUpdate(
+      orderId,
+      { orderStatus },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ status: false, message: 'Order not found' });
     }
 
-    // Update status to Accepted
-    order.status = 'Accepted';
-    await order.save();
-
-    res.status(200).json({
-      message: 'Order accepted successfully',
-      order,
+    return res.status(200).json({
+      status: true,
+      message: 'Order status updated successfully',
+      data: updatedOrder
     });
-
-  } catch (err) {
-    return ThrowError(res, 500, err.message);
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
   }
-
 };
 
+//seller accepet order
+export const sellerAcceptOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { orderStatus } = req.body;
 
+
+    if (!orderId || !orderStatus) {
+      return res.status(400).json({ status: false, message: 'Order ID and status are required' });
+    }
+    const validStatuses = ['accepted'];
+    if (!validStatuses.includes(orderStatus)) {
+      return res.status(400).json({ status: false, message: 'Invalid order status' });
+    }
+    // Check if the order exists
+    const order = await ordermodel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ status: false, message: 'Order not found' });
+    }
+    // Check if the order is already accepted or rejected
+    if (order.orderStatus === 'accepted') {
+      return res.status(400).json({ status: false, message: 'Order has already been accepted' });
+    }
+
+    const updatedOrder = await ordermodel.findByIdAndUpdate(
+      orderId,
+      { orderStatus },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ status: false, message: 'Order not found' });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: 'Order status updated successfully',
+      data: updatedOrder
+    });
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
+  }
+};
+
+//get api for payment status
+export const getOrderPayments = async (req, res) => {
+  try {
+    const orders = await orderModel.find({}, {
+      _id: 1,
+      transactionId: 1,
+      createdAt: 1,
+      card_HolderName: 1,
+      paymentMethod: 1,
+      totalAmount: 1,
+      paymentStatus: 1
+    }).sort({ createdAt: -1 });
+
+    const formattedOrders = orders.map(order => {
+      return {
+        orderId: order._id.toString(), 
+        transactionId: order.transactionId,
+        date: order.createdAt.toLocaleString('en-GB', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: true
+        }),
+        customerName: order.card_HolderName,
+        paymentMethod: order.paymentMethod,
+        amount: `$${order.totalAmount}`,
+        paymentStatus: order.paymentStatus
+      };
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Order payment data retrieved successfully",
+      data: formattedOrders
+    });
+
+  } catch (error) {
+    return ThrowError(res, 500, error.message || 'Server Error');
+  }
+};

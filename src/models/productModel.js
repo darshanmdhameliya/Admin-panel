@@ -18,8 +18,7 @@ const productSchema = mongoose.Schema(
         },
         productimage: {
             type: Array
-        }
-        ,
+        },
         unit: [{
             type: String,
             default: ["KG", "Gram", "Piece"],

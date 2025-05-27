@@ -9,9 +9,18 @@ const orderSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'addresses'
   },
-  product: {
-    type: Array
-  },
+  product: [
+    {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+      },
+      quantity: {
+        type: Number,
+        default: 1
+      }
+    }
+  ],
   subTotal: {
     type: String
   },
@@ -46,7 +55,8 @@ const orderSchema = mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ["accepted", "rejected"],
+    enum: ["accepted", "rejected", "pending", "under process", "shipped", "delivered", "cancelled"],
+    default: "pending"
   }
 }, {
   timestamps: true,

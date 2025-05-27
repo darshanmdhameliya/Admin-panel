@@ -1,6 +1,28 @@
 import rejectOrderModel from "../models/rejectOrderModel.js";
 
 class RejectOrderServices {
+    // Create Rejection
+    async createRejection(body) {
+        try {
+            const { orderId, reason, comment } = body;
+
+            // Basic validation
+            if (!orderId || !reason || !comment) {
+                throw new Error("All fields are required");
+            }
+
+            const rejectedOrder = new rejectOrderModel({
+                orderId,
+                reason,
+                comment,
+                status: 'rejected',
+            });
+
+            return await rejectedOrder.save();
+        } catch (error) {
+            return error.message;
+        }
+    }
 
     //reject order
     async rejectOrder(orderId, reason) {

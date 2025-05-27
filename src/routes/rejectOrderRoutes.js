@@ -4,7 +4,7 @@ import { deleteRejectedOrder, getRejectedOrderById, getRejectedOrders, rejectOrd
 const rejectOrderRoutes = express.Router();
 
 // Reject order route
-rejectOrderRoutes.post('/rejectOrder', rejectOrder);
+rejectOrderRoutes.post('/rejectOrder/:id', rejectOrder);
 rejectOrderRoutes.get('/getRejectedOrders', getRejectedOrders);
 rejectOrderRoutes.get('/getRejectedOrderById/:id', getRejectedOrderById);
 rejectOrderRoutes.put('/updateRejectedOrder/:id', updateRejectedOrder);

@@ -1,33 +1,60 @@
 import { ThrowError } from '../utils/ErrorUtils.js';
 import RejectOrderServices from '../services/rejectOderServices.js';
-import OrderServices from '../services/orderServices.js';
 import rejectOrderModel from '../models/rejectOrderModel.js';
+import ordermodel from '../models/orderModel.js';
 
 const rejectOrderServices = new RejectOrderServices();
-const orderServices = new OrderServices();
 
-// Reject Order
+//when i reject an order, at time orderstatus will be updated to rejected
 export const rejectOrder = async (req, res) => {
-    const { orderId, reason, comment } = req.body;
-
-    // Basic validation
-    if (!orderId || !reason || !comment) {
-        return res.status(400).json({ message: "All fields are required" });
-    }
-
     try {
-        // Create and save the rejection
-        const rejection = new rejectOrderModel({
+        const orderId = req.params.id;
+        const { reason, comment } = req.body;
+
+        // Validate input
+        if (!orderId || !reason || !comment) {
+            return res.status(400).json({
+                status: false,
+                message: 'Order ID, reason, and comment are required'
+            });
+        }
+
+        // Check if order exists
+        const order = await ordermodel.findById(orderId);
+        if (!order) {
+            return res.status(404).json({
+                status: false,
+                message: 'Order not found'
+            });
+        }
+
+        // Check if already rejected
+        if (order.orderStatus === 'rejected') {
+            return res.status(400).json({
+                status: false,
+                message: 'Order has already been rejected'
+            });
+        }
+
+        // Update order status
+        order.orderStatus = 'rejected';
+        await order.save();
+
+        // Log rejection reason
+        const rejectedOrder = await rejectOrderModel.create({
             orderId,
             reason,
-            comment
+            comment,
+            orderStatus: 'rejected'
         });
 
-        await rejection.save();
-
-        res.status(201).json({
-            message: "Order rejected successfully",
-            data: rejection
+        return res.status(200).json({
+            status: true,
+            message: 'Order rejected successfully',
+            data: {
+                updatedOrder: order,
+                rejectionLog: rejectedOrder
+            }
         });
     } catch (error) {
         return ThrowError(res, 500, error.message);

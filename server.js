@@ -10,6 +10,8 @@ import userRoutes from "./src/routes/userRoutes.js";
 import couponRoutes from "./src/routes/couponRoutes.js";
 import addressRoutes from "./src/routes/addressRoutes.js";
 import rejectOrderRoutes from "./src/routes/rejectOrderRoutes.js";
+import inventoryRoutes from "./src/routes/inventoryRoutes.js";
+import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 dotenv.config();
 
 const port = process.env.PORT;
@@ -40,6 +42,11 @@ app.use("/api/addresses", addressRoutes);
 //rejectOrder Route
 app.use("/api/rejectOrders", rejectOrderRoutes);
 
+//inventory Route
+app.use("/api/inventory", inventoryRoutes);
+
+//dashboard Route
+app.use("/api/dashboard", dashboardRoutes);
 
 // Connect to Database
 connectDB();

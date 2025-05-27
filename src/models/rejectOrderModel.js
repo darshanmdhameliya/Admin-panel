@@ -13,6 +13,10 @@ const rejectSchema = mongoose.Schema({
     comment: {
         type: String,
         required: true
+    },
+    orderStatus: {
+        type: String,
+        enum: ["rejected",],
     }
 })
 export default mongoose.model("RejectOrder", rejectSchema);
