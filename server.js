@@ -12,13 +12,13 @@ import addressRoutes from "./src/routes/addressRoutes.js";
 import rejectOrderRoutes from "./src/routes/rejectOrderRoutes.js";
 import inventoryRoutes from "./src/routes/inventoryRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
+import categoryRoutes from "./src/routes/categoryRoutes.js";
 dotenv.config();
 
 const port = process.env.PORT;
 const app = express();
 app.use(cookieParser());
 
-// Middleware
 app.use(express.json());
 
 //seller Route
@@ -47,6 +47,9 @@ app.use("/api/inventory", inventoryRoutes);
 
 //dashboard Route
 app.use("/api/dashboard", dashboardRoutes);
+
+//category Route
+app.use("/api/category",categoryRoutes)
 
 // Connect to Database
 connectDB();

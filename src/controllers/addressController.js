@@ -97,3 +97,16 @@ export const getAddress = async (req, res) => {
         return ThrowError(res, 500, error.message);
     }
 }
+
+//getAll address
+export const getAllAddress = async (req, res) => {
+    try {
+        const address = await addressServices.getAllAddress();
+        return res.status(200).json({
+            message: "address fetched successfully",
+            data: address,
+        });
+    } catch (error) {
+        return ThrowError(res, 500, error.message)
+    }
+}

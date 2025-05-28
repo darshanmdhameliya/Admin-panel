@@ -6,6 +6,15 @@ class AddressServices {
         return await addressModel.findOne({ userId });
     }
 
+    //getAllAddress
+    async getAllAddress() {
+        try {
+            return await addressModel.find()
+        } catch (error) {
+            return error.message;
+        }
+    }
+
     // Add Address
     async addAddress(addressData) {
         const newAddress = new addressModel(addressData);

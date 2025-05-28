@@ -2,8 +2,8 @@ import ordermodel from "../models/orderModel.js";
 import { ThrowError } from "../utils/ErrorUtils.js";
 import productModel from "../models/productModel.js";
 import orderModel from "../models/orderModel.js";
-//add new order
 
+//add new order
 export const addNewOrder = async (req, res) => {
   try {
     const {
@@ -22,25 +22,48 @@ export const addNewOrder = async (req, res) => {
     const productIds = product.map(p => p.productId);
     const products = await productModel.find({ _id: { $in: productIds } });
 
-    let subTotal = 0;
+    const insufficientStock = [];
 
-    product.forEach(p => {
-      const prodDetail = products.find(prod => prod._id.toString() === p.productId);
-      if (prodDetail) {
-        const price = prodDetail.price;
-        const productDiscount = prodDetail.discount || 0; // Product-level discount %
-        const discountedPrice = price - (price * productDiscount / 100);
-        subTotal += discountedPrice * p.quantity;
+    for (const p of product) {
+      const prod = products.find(pr => pr._id.toString() === p.productId);
+      if (!prod) {
+        insufficientStock.push({
+          productId: p.productId,
+          message: "Product not found"
+        });
+      } else if (p.quantity > prod.quantity) {
+        insufficientStock.push({
+          productId: p.productId,
+          name: prod.name,
+          requested: p.quantity,
+          available: prod.quantity,
+          message: `Only ${prod.quantity} available`
+        });
       }
-    });
+    }
 
-    const orderLevelDiscount = discount || 0; // e.g., 10%
-    const discountAmount = (subTotal * orderLevelDiscount) / 100;
+    if (insufficientStock.length > 0) {
+      return res.status(400).json({
+        message: "Some products are not available in the requested quantity.",
+        insufficientStock
+      });
+    }
+
+
+    let subTotal = 0;
+    for (const p of product) {
+      const prod = products.find(pr => pr._id.toString() === p.productId);
+      const price = prod.price;
+      const prodDiscount = prod.discount || 0;
+      const discountedPrice = price - (price * prodDiscount / 100);
+      subTotal += discountedPrice * p.quantity;
+    }
+
+
+    const discountAmount = (subTotal * (discount || 0)) / 100;
     const discountedPrice = subTotal - discountAmount;
-
-    const tax = 18; // Assume 18%
+    const tax = 18;
     const taxAmount = (discountedPrice * tax) / 100;
-
     const deliveryCharge = 150;
     const totalAmount = discountedPrice + taxAmount + deliveryCharge;
 
@@ -61,13 +84,46 @@ export const addNewOrder = async (req, res) => {
       orderStatus
     });
 
-
     await newOrder.save();
+   
+    for (const p of product) {
+      await productModel.findByIdAndUpdate(p.productId, {
+        $inc: { quantity: -p.quantity }
+      });
+    }
 
     return res.status(201).json({
       message: "Order added successfully",
       data: newOrder,
     });
+
+  } catch (error) {
+    return ThrowError(res, 500, error.message);
+  }
+};
+
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    const order = await ordermodel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+
+    for (const item of order.product) {
+      await productModel.findByIdAndUpdate(item.productId, {
+        $inc: { quantity: item.quantity }
+      });
+    }
+
+ 
+    await ordermodel.findByIdAndDelete(orderId);
+
+    return res.status(200).json({ message: "Order deleted and product quantity restored." });
+
   } catch (error) {
     return ThrowError(res, 500, error.message);
   }
@@ -285,7 +341,7 @@ export const getOrderPayments = async (req, res) => {
 
     const formattedOrders = orders.map(order => {
       return {
-        orderId: order._id.toString(), 
+        orderId: order._id.toString(),
         transactionId: order.transactionId,
         date: order.createdAt.toLocaleString('en-GB', {
           day: '2-digit', month: 'short', year: 'numeric',

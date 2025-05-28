@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const productSchema = mongoose.Schema(
     {
         category: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category"
         },
         product_name: {
             type: String,

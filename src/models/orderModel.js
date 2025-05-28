@@ -11,14 +11,9 @@ const orderSchema = mongoose.Schema({
   },
   product: [
     {
-      _id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-      },
-      quantity: {
-        type: Number,
-        default: 1
-      }
+      _id: false,
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      quantity: Number,
     }
   ],
   subTotal: {
