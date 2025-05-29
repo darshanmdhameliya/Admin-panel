@@ -20,7 +20,9 @@ export const addNewProduct = async (req, res) => {
             unit,
             quantity,
             product_description,
-            createdBy
+            createdBy,
+            Health_Benefits,
+            Storage_Use
         } = req.body;
 
         const productImages = req.files?.productimage || [];
@@ -60,7 +62,9 @@ export const addNewProduct = async (req, res) => {
             unit,
             quantity,
             product_description,
-            createdBy
+            createdBy,
+            Health_Benefits,
+            Storage_Use
         });
 
         await newProduct.save();

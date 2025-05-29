@@ -4,20 +4,20 @@ import path from 'path';
 import sharp from 'sharp';
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const folderName = file.fieldname;
-        const uploadPath = path.join('public', folderName);
+  destination: function (req, file, cb) {
+    const folderName = file.fieldname;
+    const uploadPath = path.join('public', folderName);
 
-        fs.mkdir(uploadPath, { recursive: true }, (error) => {
-            if (error) return cb(error);
-            cb(null, uploadPath);
-        });
-    },
-    filename: function (req, file, cb) {
-        const sanitizedName = file.originalname.replace(/\s+/g, '');
-        const finalName = `${Date.now()}-${sanitizedName}`;
-        cb(null, finalName);
-    }
+    fs.mkdir(uploadPath, { recursive: true }, (error) => {
+      if (error) return cb(error);
+      cb(null, uploadPath);
+    });
+  },
+  filename: function (req, file, cb) {
+    const sanitizedName = file.originalname.replace(/\s+/g, '');
+    const finalName = `${Date.now()}-${sanitizedName}`;
+    cb(null, finalName);
+  }
 });
 
 const fileFilter = (req, file, cb) => {
@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
     'image/jpeg',
     'image/png',
     'image/webp',
-    'image/jfif', 
+    'image/jfif',
     'application/octet-stream' // fallback for .jfif when mimetype is incorrect
   ];
 
@@ -40,21 +40,19 @@ const fileFilter = (req, file, cb) => {
 
 
 const upload = multer({
-    storage,
-    fileFilter,
-    limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+  storage,
+  fileFilter,
+  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
 });
 
 export const convertJfifToJpeg = async (req, res, next) => {
   try {
-    if (!req.files || !req.files['productimage'] || req.files['productimage'].length === 0) {
-      return next();
-    }
+    const file = req.file || (req.files && req.files['productimage'] && req.files['productimage'][0]);
+    if (!file) return next();
 
-    const file = req.files['productimage'][0];
     const ext = path.extname(file.originalname).toLowerCase();
 
-    if (ext === '.jfif') {
+    if (ext === '.jfif' || file.mimetype === 'image/jfif' || file.mimetype === 'application/octet-stream') {
       const parsedPath = path.parse(file.path);
       const jpegPath = path.join(parsedPath.dir, `${parsedPath.name}.jpeg`);
 
@@ -62,17 +60,20 @@ export const convertJfifToJpeg = async (req, res, next) => {
         .jpeg()
         .toFile(jpegPath);
 
-      fs.unlinkSync(file.path); // Delete .jfif
+      fs.unlinkSync(file.path); // remove old .jfif
       file.path = jpegPath;
       file.filename = path.basename(jpegPath);
       file.mimetype = 'image/jpeg';
+
     }
 
     next();
   } catch (err) {
+    console.error('Error in convertJfifToJpeg:', err);
     next(err);
   }
 };
+
 
 
 export default upload;

@@ -1,5 +1,5 @@
 import express from "express";
-import { addNewOrder, deleteOrder, getAllOrder, getOrderPayments, sellerAcceptOrder, updateOrder } from "../controllers/orderController.js";
+import { addNewOrder, deleteOrder, getAllOrder, getOrderPayments, getPaymentSummary, sellerAcceptOrder, updateOrder } from "../controllers/orderController.js";
 import sellerAuth from "../middlerware/auth.js";
 
 
@@ -15,5 +15,6 @@ ordersRoutes.put("/sellerAcceptOrder/:id", sellerAuth, sellerAcceptOrder);
 
 //payment status
 ordersRoutes.get("/getOrderPayments", getOrderPayments);
+ordersRoutes.get("/getPaymentSummary", getPaymentSummary);
 
 export default ordersRoutes;

@@ -37,6 +37,12 @@ const productSchema = mongoose.Schema(
         description: {
             type: String,
         },
+        Health_Benefits: {
+            type: String
+        },
+        Storage_Use: {
+            type: String
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Seller",

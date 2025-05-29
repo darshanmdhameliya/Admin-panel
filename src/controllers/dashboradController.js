@@ -10,33 +10,37 @@ export const getDashboardSummary = async (req, res) => {
         const totalDelivered = await orderModel.countDocuments({ orderStatus: 'delivered' });
 
         // Sales by Category
-        let getSalesData = await orderModel.aggregate([
-            { $match: { orderStatus: "delivered" } },
-            { $unwind: '$items' },
+        const getSalesData = await orderModel.aggregate([
+            { $match: { orderStatus: 'delivered' } },
+            { $unwind: '$product' },
             {
                 $lookup: {
                     from: 'products',
-                    localField: "items.productId",
-                    foreignField: "_id",
-                    as: "productData"
+                    localField: 'product.productId',
+                    foreignField: '_id',
+                    as: 'productData'
                 }
             },
-            { $unwind: '$productData' },
+            { $unwind: { path: '$productData', preserveNullAndEmptyArrays: false } }, // remove unmatched
             {
                 $lookup: {
                     from: 'categories',
-                    localField: 'productData.categoryId',
+                    localField: 'productData.category',
                     foreignField: '_id',
                     as: 'categoryData'
                 }
             },
-            { $unwind: '$categoryData' },
+            { $unwind: { path: '$categoryData', preserveNullAndEmptyArrays: false } },
             {
                 $group: {
                     _id: '$categoryData._id',
                     categoryName: { $first: '$categoryData.categoryName' },
-                    totalSales: { $sum: '$items.quantity' },
-                    totalAmount: { $sum: { $multiply: ['$items.quantity', '$productData.price'] } }
+                    totalSales: { $sum: '$product.quantity' },
+                    totalAmount: {
+                        $sum: {
+                            $multiply: ['$product.quantity', '$productData.price']
+                        }
+                    }
                 }
             },
             {
@@ -48,11 +52,18 @@ export const getDashboardSummary = async (req, res) => {
             }
         ]);
 
+        // Debug: Log if no categories are found
+        if (getSalesData.length === 0) {
+            console.warn('⚠️ No delivered orders found with valid product and category data.');
+        }
+
         const totalSales = getSalesData.reduce((sum, item) => sum + item.totalSales, 0);
 
         const salesByCategory = getSalesData.map(item => ({
             ...item,
-            percentage: parseFloat(((item.totalSales / totalSales) * 100).toFixed(2))
+            percentage: totalSales > 0
+                ? parseFloat(((item.totalSales / totalSales) * 100).toFixed(2))
+                : 0
         }));
 
         // Revenue Stats

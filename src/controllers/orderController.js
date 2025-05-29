@@ -85,7 +85,7 @@ export const addNewOrder = async (req, res) => {
     });
 
     await newOrder.save();
-   
+
     for (const p of product) {
       await productModel.findByIdAndUpdate(p.productId, {
         $inc: { quantity: -p.quantity }
@@ -102,7 +102,7 @@ export const addNewOrder = async (req, res) => {
   }
 };
 
-
+//delete order
 export const deleteOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -119,7 +119,7 @@ export const deleteOrder = async (req, res) => {
       });
     }
 
- 
+
     await ordermodel.findByIdAndDelete(orderId);
 
     return res.status(200).json({ message: "Order deleted and product quantity restored." });
@@ -244,7 +244,7 @@ export const getAllOrder = async (req, res) => {
 export const updateOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { orderStatus } = req.body;
+    const { orderStatus, paymentMethod, paymentStatus } = req.body;
 
     if (!orderId || !orderStatus) {
       return res.status(400).json({ status: false, message: 'Order ID and status are required' });
@@ -264,7 +264,7 @@ export const updateOrder = async (req, res) => {
     // Update the order status
     const updatedOrder = await ordermodel.findByIdAndUpdate(
       orderId,
-      { orderStatus },
+      { orderStatus, paymentMethod, paymentStatus },
       { new: true }
     );
 
@@ -336,7 +336,8 @@ export const getOrderPayments = async (req, res) => {
       card_HolderName: 1,
       paymentMethod: 1,
       totalAmount: 1,
-      paymentStatus: 1
+      paymentStatus: 1,
+      orderStatus: 1
     }).sort({ createdAt: -1 });
 
     const formattedOrders = orders.map(order => {
@@ -350,7 +351,8 @@ export const getOrderPayments = async (req, res) => {
         customerName: order.card_HolderName,
         paymentMethod: order.paymentMethod,
         amount: `$${order.totalAmount}`,
-        paymentStatus: order.paymentStatus
+        paymentStatus: order.paymentStatus,
+        orderStatus: order.orderStatus
       };
     });
 
@@ -360,6 +362,57 @@ export const getOrderPayments = async (req, res) => {
       data: formattedOrders
     });
 
+  } catch (error) {
+    return ThrowError(res, 500, error.message || 'Server Error');
+  }
+};
+
+//get api for payment summary
+export const getPaymentSummary = async (req, res) => {
+  try {
+    const deliveredOrders = await orderModel.find({ orderStatus: 'delivered' });
+
+    let totalEarnings = 0;
+    let onlinePayment = 0;
+    let codPayment = 0;
+
+    for (const order of deliveredOrders) {
+      const amount = Number(order.totalAmount) || 0;
+      totalEarnings += amount;
+
+      const method = (order.paymentMethod || '').toLowerCase().trim();
+
+      const isOnline = ['card', 'net', 'upi', 'online'].some(keyword => method.includes(keyword));
+      const isCOD = method.includes('cod') || method.includes('cash');
+
+      if (isOnline) {
+        onlinePayment += amount;
+      } else if (isCOD) {
+        codPayment += amount;
+      } else {
+        console.warn(`Unknown payment method: "${order.paymentMethod}"`);
+      }
+    }
+
+    const pendingOrders = await orderModel.find({
+      paymentStatus: { $regex: '^pending$', $options: 'i' }
+    });
+
+    const pendingPayments = pendingOrders.reduce(
+      (sum, order) => sum + (Number(order.totalAmount) || 0),
+      0
+    );
+
+    res.status(200).json({
+      status: true,
+      message: 'Payment summary retrieved successfully',
+      data: {
+        totalEarnings: +totalEarnings.toFixed(2),
+        onlinePayment: +onlinePayment.toFixed(2),
+        codPayment: +codPayment.toFixed(2),
+        pendingPayments: +pendingPayments.toFixed(2)
+      }
+    });
   } catch (error) {
     return ThrowError(res, 500, error.message || 'Server Error');
   }

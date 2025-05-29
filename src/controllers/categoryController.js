@@ -64,6 +64,13 @@ export const getAllCategory = async (req, res) => {
     try {
         const categories = await categoryModel.find().sort({ createdAt: -1 });
 
+        if (!categories || categories.length === 0) {
+            return res.status(200).json({
+                message: "No any Category added",
+                data: [],
+            });
+        }
+
         return res.status(200).json({
             message: "All categories fetched successfully",
             data: categories,
@@ -124,7 +131,7 @@ export const deleteCategoryById = async (req, res) => {
         }
 
         if (category.categoryImage) {
-            const imagePath = path.resolve(category.categoryImage); 
+            const imagePath = path.resolve(category.categoryImage);
 
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);

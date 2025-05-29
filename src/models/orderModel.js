@@ -36,7 +36,7 @@ const orderSchema = mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Debit / Credit Card", "Net Banking", "Paypal"]
+    enum: ["Debit / Credit Card", "Net Banking", "COD","UPI"]
   },
   transactionId: {
     type: mongoose.Schema.Types.ObjectId,

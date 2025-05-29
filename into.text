@@ -1,7 +1,103 @@
-register => http://localhost:3000/api/user/users/registerUser
-verifyotp => http://localhost:3000/api/user/users/verifyOtp
-login => http://localhost:3000/api/user/users/loginUser
-passwordchange => http://localhost:3000/api/user/users/changePassword
-forgotpassword => http://localhost:3000/api/user/users/forgotPassword
-verifyemail => http://localhost:3000/api/user/users/verifyEmail
-resetpassword => http://localhost:3000/api/user/users/resetPassword
+ragister => http://localhost:3000/api/sellers/registerSeller
+verifyOtp => http://localhost:3000/api/sellers/verifyOtp
+
+login => http://localhost:3000/api/sellers/loginSeller
+logout => http://localhost:3000/api/sellers/logout
+passwordchange => http://localhost:3000/api/sellers/changePassword?sellerId=id
+
+forgotPassword => http://localhost:3000/api/sellers/forgotPassword
+verifyEmail => http://localhost:3000/api/sellers/verifyEmail
+reset-resetPassword => http://localhost:3000/api/sellers/resetPassword
+pananu
+
+gstno => http://localhost:3000/api/sellers/gstNo
+verifygst => http://localhost:3000/api/sellers/verifyGst
+verify otp => http://localhost:3000/api/sellers/verifyGstOtp
+
+branddetails => http://localhost:3000/api/sellers/brandDetails
+bankdetails => http://localhost:3000/api/sellers/bankDetails
+pickupaddresas => http://localhost:3000/api/sellers/pickupAddress
+editbankdetails => http://localhost:3000/api/sellers/editbankDetails/:id
+verifybankotp => http://localhost:3000/api/sellers/verifyBankOtp
+deleteaccount => http://localhost:3000/api/sellers/deleteAccount/:id
+logout => http://localhost:3000/api/sellers/logout
+
+addproduct => http://localhost:3000/api/products/addNewProduct
+getAllproduct => http://localhost:3000/api/products/getAllProducts
+getProductById => http://localhost:3000/api/products/getProductById/:id
+editProduct => http://localhost:3000/api/products/editProduct/:id
+deleteProduct => http://localhost:3000/api/products/deleteProduct/:id
+
+user => http://localhost:3000/api/users/addUser
+loginuser => http://localhost:3000/api/users/loginUser
+getuserById => http://localhost:3000/api/users/getUserById/:id
+updateUser => http://localhost:3000/api/users/updateUser/:id
+deleteUser => http://localhost:3000/api/users/deleteUser/:id
+getAllUsers => http://localhost:3000/api/users/getAllUsers
+
+addAddress => http://localhost:3000/api/addresses/addAddress
+getAddress => http://localhost:3000/api/addresses/getAddress/:id
+getAllAddress => http://localhost:3000/api/addresses/getAllAddress
+updateAddress => http://localhost:3000/api/addresses/updateAddress
+
+
+addCoupon => http://localhost:3000/api/coupons/addCoupon
+getCoupon => http://localhost:3000/api/coupons/getCoupon
+getAllCoupon => http://localhost:3000/api/coupons/getAllCoupon
+updateCoupon => http://localhost:3000/api/coupons/updateCoupon/:id
+deleteCoupon => http://localhost:3000/api/coupons/deleteCoupon/:id
+
+addNewOrder => http://localhost:3000/api/orders/addNewOrder
+deleteOrder => http://localhost:3000/api/orders/deleteOrder/:id
+updateOrder => http://localhost:3000/api/orders/updateOrder/:id
+getAllOrder => http://localhost:3000/api/orders/getAllOrder
+
+sellerAcceptOrder => http://localhost:3000/api/orders/sellerAcceptOrder/:id
+getOrderPayments => http://localhost:3000/api/orders/getOrderPayments
+getPaymentSummary => http://localhost:3000/api/orders/getPaymentSummary
+
+rejectOrder => http://localhost:3000/api/rejectOrders/rejectOrder/:id
+getRejectedOrders => http://localhost:3000/api/rejectOrders/getRejectedOrders
+getRejectedOrderById => http://localhost:3000/api/rejectOrders/getRejectedOrderById/:id
+updateRejectedOrder => http://localhost:3000/api/rejectOrders/updateRejectedOrder/:id
+deleteRejectedOrder => http://localhost:3000/api/rejectOrders/deleteRejectedOrder/:id
+
+addInventory => http://localhost:3000/api/inventory/addInventory
+getInventoryItem => http://localhost:3000/api/inventory/getInventoryItem/:id
+getAllInventoryItems => http://localhost:3000/api/inventory/getAllInventoryItems
+updateInventoryItem => http://localhost:3000/api/inventory/updateInventoryItem/:id
+deleteInventoryItem => http://localhost:3000/api/inventory/deleteInventoryItem/:id
+
+getDashboardSummary => http://localhost:3000/api/dashboard/getDashboardSummary
+
+createCategory => http://localhost:3000/api/category/createCategory
+getAllCategory => http://localhost:3000/api/category/getAllCategory
+getCategory => http://localhost:3000/api/category/getCategory/:id
+updateCategoryById => http://localhost:3000/api/category/updateCategoryById/:id
+deleteCategoryById => http://localhost:3000/api/category/deleteCategoryById/:id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
